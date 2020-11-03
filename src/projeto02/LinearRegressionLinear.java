@@ -1,7 +1,14 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Essa classe implementa o algoritmo de Regressão Linear utilizando estruturas
+ * sequenciais de java. Na classe Main há um exemplo com dados de vendas de 
+ * apartamentos, com tamanho em metros quadrados e preço em reais.
+ *
+ * Para o desenvolvimento dos algoritmos de Regressão Linear utilizou-se esse 
+ * artigo como base: http://www.sakurai.dev.br/regressao-linear-simples/.
+ *
+ * As funções matemáticas utilizadas aqui foram modificadas a partir do código 
+ * da biblioteca Smile (https://haifengl.github.io/index.html), como sum(), 
+ * mean(), cov(), var(), cor() e sd().
  */
 package projeto02;
 
@@ -22,14 +29,6 @@ public class LinearRegressionLinear {
     private double[] list_y; // List of apartment price values
     private double alpha;
     private double beta;
-
-    public double[] getList_x() {
-        return list_x;
-    }
-
-    public double[] getList_y() {
-        return list_y;
-    }
 
     public LinearRegressionLinear(double[] x, double[] y) {
         this.list_x = x;
@@ -55,7 +54,6 @@ public class LinearRegressionLinear {
             sum += n;
         }
 
-        System.out.println("Soma: " + sum);
         return sum;
     }
     
@@ -106,7 +104,6 @@ public class LinearRegressionLinear {
             sumsq += xi * xi;
         }
 
-        System.out.println("Somasq-var: " + sumsq);
         int n = x.length - 1;
         return sumsq / n - (sum / x.length) * (sum / n);
     }
@@ -160,12 +157,14 @@ public class LinearRegressionLinear {
     
     public static void main(String[] args) {
         try {
-            // Loads the values from data file
-            CSVReader reader = new CSVReader(new FileReader(".//src//projeto02//aptos-metro-valor.csv"));
+            // Number of apartments
+            int number_elements = 400;
             
+            // === Loads the values from data file ===
+            CSVReader reader = new CSVReader(new FileReader(".//src//projeto02//aptos-metro-valor.csv"));
             String [] nextLine;
-            double[] x = new double [400];
-            double[] y = new double [400];
+            double[] x = new double [number_elements];
+            double[] y = new double [number_elements];
             nextLine = reader.readNext(); // Reads the first line
             int index = 0;
             while ((nextLine = reader.readNext()) != null) {
@@ -174,9 +173,11 @@ public class LinearRegressionLinear {
                 index++;
             }
 
+            // === Uses Linear Regression to predicts the price to some size
+            double size = 60;
             LinearRegressionLinear lr = new LinearRegressionLinear(x, y); // Creates the LinearRegression object with the data of apartment
-            lr.least_squares(lr.list_x, lr.list_y); // Calculates alpha and beta
-            System.out.printf("A 100m apartment costs: %.2f", lr.linearRegression(60)); // Predicts the price value to a size of 60m
+            lr.least_squares(x, y); // Calculates alpha and beta
+            System.out.printf("A "+ size + "m apartment costs: R$%.2f", lr.linearRegression(size)); // Predicts the price value to a size of 60m
             
         } catch (FileNotFoundException ex) {
             Logger.getLogger(LinearRegressionLinear.class.getName()).log(Level.SEVERE, null, ex);

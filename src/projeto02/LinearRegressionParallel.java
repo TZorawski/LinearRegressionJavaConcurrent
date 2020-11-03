@@ -1,7 +1,14 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Essa classe implementa o algoritmo de Regressão Linear utilizando estruturas
+ * concorrentes de java. Na classe Main há um exemplo com dados de vendas de 
+ * apartamentos, com tamanho em metros quadrados e preço em reais.
+ *
+ * Para o desenvolvimento dos algoritmos de Regressão Linear utilizou-se esse 
+ * artigo como base: http://www.sakurai.dev.br/regressao-linear-simples/.
+ *
+ * As funções matemáticas utilizadas aqui foram modificadas a partir do código 
+ * da biblioteca Smile (https://haifengl.github.io/index.html), como sum(), 
+ * mean(), cov(), var(), cor() e sd().
  */
 package projeto02;
 
@@ -81,14 +88,6 @@ public class LinearRegressionParallel {
     private int number_threads; // Number of threads to execute the tasks
     int number_elements;
     private ExecutorService ex; // Manage threads
-
-    public double[] getList_x() {
-        return list_x;
-    }
-
-    public double[] getList_y() {
-        return list_y;
-    }
     
     public LinearRegressionParallel(double[] x, double[] y, int number_threads, int number_elements) {
         this.list_x = x;
@@ -141,8 +140,6 @@ public class LinearRegressionParallel {
         } catch (ExecutionException ex) {
             Logger.getLogger(LinearRegressionParallel.class.getName()).log(Level.SEVERE, null, ex);
         }
-            
-        System.out.println("Soma: " + sum);
 
         return sum;
     }
@@ -219,7 +216,6 @@ public class LinearRegressionParallel {
         } catch (ExecutionException ex) {
             Logger.getLogger(LinearRegressionParallel.class.getName()).log(Level.SEVERE, null, ex);
         }
-        System.out.println("Soma-var: " + sum);
         
         /* ------------------------------------- */
         
@@ -234,7 +230,6 @@ public class LinearRegressionParallel {
         } catch (ExecutionException ex) {
             Logger.getLogger(LinearRegressionParallel.class.getName()).log(Level.SEVERE, null, ex);
         }
-        System.out.println("Somasq-var: " + sumsq);
         
         /*for (double xi : x) {
             sum += xi;
@@ -292,10 +287,16 @@ public class LinearRegressionParallel {
         return prediction(alpha, beta, z);
     }
     
+    public void shutdown() {
+        ex.shutdown();
+    }
+    
     public static void main(String[] args) {
         try {
+            // Number of apartments
             int number_elements = 400;
-            // Loads the values from data file
+            
+            // === Loads the values from data file ===
             CSVReader reader = new CSVReader(new FileReader(".//src//projeto02//aptos-metro-valor.csv"));
             
             String [] nextLine;
@@ -309,10 +310,13 @@ public class LinearRegressionParallel {
                 index++;
             }
 
+            // === Uses Linear Regression to predicts the price to some size
+            double size = 60;
             LinearRegressionParallel lr = new LinearRegressionParallel(x, y, 2, number_elements); // Creates the LinearRegression object with the data of apartment
-            lr.least_squares(lr.list_x, lr.list_y); // Calculates alpha and beta
-            System.out.printf("A 100m apartment costs: %.2f", lr.linearRegression(60)); // Predicts the price value to a size of 60m
-            
+            lr.least_squares(x, y); // Calculates alpha and beta
+            System.out.printf("A "+ size + "m apartment costs: R$%.2f", lr.linearRegression(size)); // Predicts the price value to a size of 60m
+
+            lr.shutdown();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(LinearRegressionLinear.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
